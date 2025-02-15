@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stopwatch</title>
+  <style>
+    /* Basic styling for the stopwatch */
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 50px;
+      background-color: #f0f0f0;
+    }
+    #display {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      margin: 5px;
+      cursor: pointer;
+    }
+    #laps {
+      margin-top: 20px;
+      list-style: none;
+      padding: 0;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #laps li {
+      background: #fff;
+      margin: 5px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Stopwatch</h1>
+  <div id="display">00:00:00.000</div>
+  <button id="startStop">Start</button>
+  <button id="reset" disabled>Reset</button>
+  <button id="lap" disabled>Lap</button>
+  <ul id="laps"></ul>
+
+  <script>
+    // Variables to track time and state
+    let startTime = null;
+    let elapsedTime = 0;
+    let timerInterval = null;
+
+    // Cache DOM elements
+    const display = document.getElementById('display');
+    const startStopBtn = document.getElementById('startStop');
+    const resetBtn = document.getElementById('reset');
+    const lapBtn = document.getElementById('lap');
+    const lapsList = document.getElementById('laps');
+
+    // Convert milliseconds into a formatted time string: HH:MM:SS.mmm
+    function timeToString(time) {
+      const milliseconds = parseInt((time % 1000), 10);
+      const seconds = Math.floor((time / 1000) % 60);
+      const minutes = Math.floor((time / (1000 * 60)) % 60);
+      const hours = Math.floor(time / (1000 * 60 * 60));
+
+      const formattedHours = hours.toString().padStart(2, '0');
+      const formattedMinutes = minutes.toString().padStart(2, '0');
+      const formattedSeconds = seconds.toString().padStart(2, '0');
+      const formattedMilliseconds = milliseconds.toString().padStart(3, '0');
+
+      return `${formattedHours}:${formattedMinutes}:${formattedSeconds}.${formattedMilliseconds}`;
+    }
+
+    // Update the display with the current elapsed time
+    function updateDisplay() {
+      const timePassed = Date.now() - startTime + elapsedTime;
+      display.textContent = timeToString(timePassed);
+    }
+
+    // Start the timer
+    function startTimer() {
+      startTime = Date.now();
+      timerInterval = setInterval(updateDisplay, 10);
+      startStopBtn.textContent = 'Pause';
+      resetBtn.disabled = true;
+      lapBtn.disabled = false;
+    }
+
+    // Pause the timer
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      elapsedTime += Date.now() - startTime;
+      startStopBtn.textContent = 'Start';
+      resetBtn.disabled = false;
+      lapBtn.disabled = true;
+    }
+
+    // Reset the timer and clear laps
+    function resetTimer() {
+      clearInterval(timerInterval);
+      startTime = null;
+      elapsedTime = 0;
+      display.textContent = timeToString(0);
+      lapsList.innerHTML = '';
+      startStopBtn.textContent = 'Start';
+      resetBtn.disabled = true;
+      lapBtn.disabled = true;
+    }
+
+    // Event listeners for buttons
+    startStopBtn.addEventListener('click', () => {
+      if (startStopBtn.textContent === 'Start') {
+        startTimer();
+      } else {
+        pauseTimer();
+      }
+    });
+
+    resetBtn.addEventListener('click', resetTimer);
+
+    lapBtn.addEventListener('click', () => {
+      const lapTime = Date.now() - startTime + elapsedTime;
+      const lapItem = document.createElement('li');
+      lapItem.textContent = timeToString(lapTime);
+      lapsList.appendChild(lapItem);
+    });
+  </script>
+</body>
+</html>
